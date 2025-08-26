@@ -13,10 +13,13 @@ struct Settings {
     var rightIcon: String
 }
 
-class SettingsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class SettingsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate{
     
     var settingsLabel: UILabel!
     var settingsTable: UITableView!
+    var searchBox: UISearchBar!
+    var filteredSettingsList: [Settings] = []
+
     var settingsList: [Settings] = [
         Settings(iconTitle: "Airplane Mode", leftIcon: "airplane", rightIcon: "chevron.right"),
         Settings(iconTitle: "Wi-Fi", leftIcon: "wifi", rightIcon: "chevron.right"),
@@ -60,10 +63,22 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
         settingsLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(settingsLabel)
         
+//        Search bar
+        searchBox = UISearchBar()
+        searchBox.placeholder = "Search"
+        searchBox.delegate = self
+        searchBox.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchBox)
+
         NSLayoutConstraint.activate([
             settingsLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 42),
             settingsLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            settingsLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+            settingsLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+
+            searchBox.topAnchor.constraint(equalTo: settingsLabel.bottomAnchor, constant: 20),
+            searchBox.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            searchBox.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            searchBox.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
     
@@ -79,11 +94,11 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
         view.addSubview(settingsTable)
         
         NSLayoutConstraint.activate([
-            settingsTable.topAnchor.constraint(equalTo: settingsLabel.bottomAnchor, constant: 24),
-            settingsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
-            settingsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
-            settingsTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
+                settingsTable.topAnchor.constraint(equalTo: searchBox.bottomAnchor, constant: 20),
+                settingsTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                settingsTable.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                settingsTable.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
     }
     
     // MARK: - TableView DataSource & Delegate
@@ -152,14 +167,32 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
                 return ""
                }
     }
-//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-//        let headerView = UIView()
-//        headerView.backgroundColor = .systemGroupedBackground
-//
-//        return headerView
-//    }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 20
+    }
+    
+    
+    // MARK: - TableView DataSource & Delegate
+
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+//        By default this method value is true
+        return true
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print(searchBar.text!)
+//        Send Data to Filter Data
+        FilterData(searchBar.text!)
+    }
+    
+    func FilterData(_ input: String){
+        for i in settingsList {
+            if i.iconTitle.hasPrefix(input) {
+                filteredSettingsList.append(i)
+                print(i)
+            }
+        }
+//        Send Filtered Data to Table View
     }
 }
