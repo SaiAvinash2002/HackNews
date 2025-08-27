@@ -25,14 +25,4 @@ class SampleViewController: UIViewController {
                 view.backgroundColor = .systemRed
             }
         }
-
-    
-//    @IBAction func buttonAction(_ sender: Any) {
-//        if let userName = userNameTextField.text, userName.count > 6 {
-//            view.backgroundColor = .systemGreen
-//        } else {
-//            view.backgroundColor = .systemRed
-//        }
-//    }
-
 }

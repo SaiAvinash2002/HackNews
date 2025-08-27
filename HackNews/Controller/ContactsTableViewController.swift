@@ -1,37 +1,99 @@
 import UIKit
 
-struct Contacts {
-    var contactImage: String?
-    var contactName: String
-    var contactRole: String
-    var contactCountry: String?
-}
-
-class ContactsTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
-    
+class ContactsTableViewController: UIViewController {
+// MARK: - Properties
     private var contactsTitle: UILabel!
-    private var contactsTable: UITableView!
-    private var searchBox: UISearchBar!
+    private var contactsTable: UITableView! = UITableView(frame: .zero, style: .plain)
+    private var searchBox: UISearchBar! = UISearchBar()
     private var filteredContactsList: [Contacts] = []
-    private var contactsList: [Contacts] = [
-        Contacts(contactImage: "1", contactName: "Mohammed Hussain", contactRole: "SEO Specialist", contactCountry: "f1"),
-        Contacts(contactImage: "2", contactName: "John Young", contactRole: "Interactive Designer", contactCountry: "f2"),
-        Contacts(contactImage: "3", contactName: "Tamilarasi Mohan", contactRole: "Architect", contactCountry: "f3"),
-        Contacts(contactImage: "4", contactName: "Kim Yu", contactRole: "Economist", contactCountry: "f4"),
-        Contacts(contactImage: "5", contactName: "Derek Fowler", contactRole: "Web Strategist", contactCountry: "f5"),
-        Contacts(contactImage: "6", contactName: "Shreya Nithin", contactRole: "Product Designer", contactCountry: "f6"),
-        Contacts(contactImage: "7", contactName: "Sherlock Adams", contactRole: "Editor", contactCountry: "f7")
-    ]
+    private var contactsList: [Contacts] = Contacts.contactsData()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setUpDelegates()
         setupUI()
         setupTable()
     }
     
+    func setUpDelegates(){
+        contactsTable.delegate = self
+        contactsTable.dataSource = self
+        searchBox.delegate = self
+    }
+    
+    func setupTable() {
+        contactsTable.translatesAutoresizingMaskIntoConstraints = false
+        contactsTable.backgroundColor = .white
+        contactsTable.register(ContactsTableView.self, forCellReuseIdentifier: "ContactsCell")
+        contactsTable.rowHeight = UITableView.automaticDimension
+        contactsTable.estimatedRowHeight = 60
+        view.addSubview(contactsTable)
+        
+        NSLayoutConstraint.activate([
+            contactsTable.topAnchor.constraint(equalTo: searchBox.bottomAnchor, constant: 20),
+            contactsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+            contactsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
+            contactsTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+}
+
+// MARK: - TableView DataSource Methods
+
+extension ContactsTableViewController : UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        filteredContactsList.count != 0 ? filteredContactsList.count : contactsList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ContactsCell", for: indexPath) as! ContactsTableView
+        cell.configure(with: filteredContactsList.isEmpty ? contactsList[indexPath.row] : filteredContactsList[indexPath.row])
+        return cell
+    }
+}
+
+// MARK: - TableView Delegate Methods
+
+extension ContactsTableViewController : UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        80
+    }
+}
+
+// MARK: - SearchBar Delegate Methods
+
+extension ContactsTableViewController : UISearchBarDelegate {
+//        searchBarSearchButtonClicked(<#T##UISearchBar#>)
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print(searchBar.text!)
+//        Send Data to Filter Data
+        FilterData(searchBar.text!)
+    }
+}
+
+// MARK: - Helper Methods
+
+extension ContactsTableViewController {
+    func FilterData(_ input: String){
+        filteredContactsList = []
+        for i in contactsList {
+            if i.contactName.hasPrefix(input) {
+                filteredContactsList.append(i)
+                print(i)
+            }
+        }
+//      Reload Table View
+        dataReload()
+    }
+    
+    func dataReload() {
+        contactsTable.reloadData()
+    }
+    
     func setupUI() {
         view.backgroundColor = UIColor(red: 66/255.0, green: 209/255.0, blue: 245/255.0, alpha: 1.0)
-        
+//      Contacts
         contactsTitle = UILabel()
         contactsTitle.text = "Contacts"
         contactsTitle.font = .systemFont(ofSize: 28, weight: .bold)
@@ -39,10 +101,8 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
         contactsTitle.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(contactsTitle)
         
-        //      Search bar
-        searchBox = UISearchBar()
+//      Search bar
         searchBox.placeholder = "Search"
-        searchBox.delegate = self
         searchBox.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchBox)
         
@@ -56,64 +116,4 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
             searchBox.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
-        func setupTable() {
-            contactsTable = UITableView(frame: .zero, style: .plain)
-            contactsTable.translatesAutoresizingMaskIntoConstraints = false
-            contactsTable.delegate = self
-            contactsTable.dataSource = self
-            contactsTable.backgroundColor = .white
-            contactsTable.register(ContactsTableView.self, forCellReuseIdentifier: "ContactsCell")
-            contactsTable.rowHeight = UITableView.automaticDimension
-            contactsTable.estimatedRowHeight = 60
-            view.addSubview(contactsTable)
-            
-            NSLayoutConstraint.activate([
-                contactsTable.topAnchor.constraint(equalTo: searchBox.bottomAnchor, constant: 20),
-                contactsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
-                contactsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
-                contactsTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-            ])
-        }
-        
-        // MARK: - TableView DataSource
-        
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return filteredContactsList.count != 0 ? filteredContactsList.count : contactsList.count
-        }
-        
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ContactsCell", for: indexPath) as! ContactsTableView
-            let contact = filteredContactsList.isEmpty ? contactsList[indexPath.row] : filteredContactsList[indexPath.row]
-            cell.configure(with: contact)
-            return cell
-        }
-        
-        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 80
-        }
-        
-        // MARK: - SearchBar DataSource
-        
-//        searchBarSearchButtonClicked(<#T##UISearchBar#>)
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print(searchBar.text!)
-//        Send Data to Filter Data
-        FilterData(searchBar.text!)
-    }
-    
-    func FilterData(_ input: String){
-        filteredContactsList = []
-        for i in contactsList {
-            if i.contactName.hasPrefix(input) {
-                filteredContactsList.append(i)
-                print(i)
-            }
-        }
-//        Send Filtered Data to Table View
-        contactsTable.reloadData()
-    }
-    
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        <#code#>
-//    }
 }
