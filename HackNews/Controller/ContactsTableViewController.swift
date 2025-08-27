@@ -20,7 +20,7 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
         Contacts(contactImage: "4", contactName: "Kim Yu", contactRole: "Economist", contactCountry: "f4"),
         Contacts(contactImage: "5", contactName: "Derek Fowler", contactRole: "Web Strategist", contactCountry: "f5"),
         Contacts(contactImage: "6", contactName: "Shreya Nithin", contactRole: "Product Designer", contactCountry: "f6"),
-        Contacts(contactImage: "7", contactName: "Emily Adams", contactRole: "Editor", contactCountry: "f7")
+        Contacts(contactImage: "7", contactName: "Sherlock Adams", contactRole: "Editor", contactCountry: "f7")
     ]
     
     override func viewDidLoad() {
@@ -54,7 +54,6 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
             searchBox.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             searchBox.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             searchBox.heightAnchor.constraint(equalToConstant: 44)
-            
         ])
     }
         func setupTable() {
@@ -79,12 +78,12 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
         // MARK: - TableView DataSource
         
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return contactsList.count
+            return filteredContactsList.count != 0 ? filteredContactsList.count : contactsList.count
         }
         
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ContactsCell", for: indexPath) as! ContactsTableView
-            let contact = contactsList[indexPath.row]
+            let contact = filteredContactsList.isEmpty ? contactsList[indexPath.row] : filteredContactsList[indexPath.row]
             cell.configure(with: contact)
             return cell
         }
@@ -103,6 +102,7 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func FilterData(_ input: String){
+        filteredContactsList = []
         for i in contactsList {
             if i.contactName.hasPrefix(input) {
                 filteredContactsList.append(i)
@@ -110,6 +110,10 @@ class ContactsTableViewController: UIViewController, UITableViewDelegate, UITabl
             }
         }
 //        Send Filtered Data to Table View
+        contactsTable.reloadData()
     }
-
+    
+//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+//        <#code#>
+//    }
 }
